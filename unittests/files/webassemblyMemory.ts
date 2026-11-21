@@ -51,6 +51,20 @@ function testWebAssemblyMemory() {
     Equals<ReturnType<typeof maybeShared.toResizableBuffer>, ArrayBufferLike>
   >();
 
+  // A descriptor that is not inlined keeps the same rules.
+  const descriptor = { initial: 1 };
+  const fromVariable = new WebAssembly.Memory(descriptor);
+  assertExact<Equals<typeof fromVariable.buffer, ArrayBuffer>>();
+
+  const maybeSharedDescriptor = { initial: 1, shared: flag };
+  const fromMaybeShared = new WebAssembly.Memory(maybeSharedDescriptor);
+  assertExact<Equals<typeof fromMaybeShared.buffer, ArrayBufferLike>>();
+
+  // A descriptor typed as `MemoryDescriptor` may be shared, so it falls back to ArrayBufferLike.
+  const typedDescriptor: WebAssembly.MemoryDescriptor = { initial: 1 };
+  const fromTypedDescriptor = new WebAssembly.Memory(typedDescriptor);
+  assertExact<Equals<typeof fromTypedDescriptor.buffer, ArrayBufferLike>>();
+
   // A shared memory is still a plain `WebAssembly.Memory`.
   const plain: WebAssembly.Memory = sharedMemory;
   assertType<WebAssembly.Memory>(plain);
